@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>LiliVote · Perfect Calibration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #09090f;
+      --surface: #111118;
+      --surface2: #18181f;
+      --surface3: #1f1f29;
+      --border: rgba(255,255,255,0.07);
+      --lime: #c8f04e;
+      --pink: #f04eb0;
+      --text: #eeecf0;
+      --muted: #6a6a7a;
+      --radius: 20px;
+      --white-cover: #ffffff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px 52px;
+      position: relative;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+    .blob-1 {
+      width: 560px; height: 560px;
+      background: radial-gradient(circle, rgba(240,78,176,0.10) 0%, transparent 70%);
+      top: -180px; left: -200px;
+    }
+    .blob-2 {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(200,240,78,0.08) 0%, transparent 70%);
+      bottom: -60px; right: -120px;
+    }
+
+    nav {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 28px;
+      position: relative;
+      z-index: 2;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+    .logo .lili { color: var(--text); }
+    .logo .vote { color: var(--lime); font-style: italic; }
+    .logo .dot-accent {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--pink);
+      margin-left: 4px;
+      margin-bottom: 5px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.65); }
+    }
+
+    .support-badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.72rem;
+      padding: 6px 14px;
+      border-radius: 100px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    }
+
+    .card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .traffic-lights { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green { background: #28c840; }
+
+    .card-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-left: 8px;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .vote-count {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.72rem;
+      color: var(--lime);
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(200,240,78,0.08);
+      border: 1px solid rgba(200,240,78,0.18);
+      color: var(--lime);
+      font-size: 0.72rem;
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--lime);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    .notif-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface3);
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+    }
+    .notif-label { font-size: 0.7rem; color: var(--muted); }
+    .toggle-switch {
+      cursor: pointer;
+      width: 36px;
+      height: 20px;
+      background: #2a2a36;
+      border-radius: 30px;
+      position: relative;
+      transition: 0.2s;
+    }
+    .toggle-switch.active { background: var(--lime); }
+    .toggle-switch span {
+      width: 16px; height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: 0.2s;
+    }
+    .toggle-switch.active span { left: 18px; }
+
+    .iframe-wrap {
+      width: 100%;
+      height: 780px;
+      position: relative;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .cover {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      z-index: 2;
+      transition: background 0.25s, opacity 0.2s;
+      pointer-events: none;
+    }
+    .cover.opaque { background: var(--white-cover); }
+    .cover.translucent { background: rgba(200, 240, 78, 0.35); backdrop-filter: blur(2px); }
+    .cover.hidden { opacity: 0; background: transparent; }
+
+    .cover-label {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.5);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .cover.translucent .cover-label { opacity: 0.7; color: white; text-shadow: 0 0 4px black; }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      transition: opacity 0.4s;
+      z-index: 10;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 34px; height: 34px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--lime);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .adjust-panel {
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+    .adjust-panel.hidden { display: none; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .panel-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--pink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-title::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--pink);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .close-panel-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s;
+    }
+    .close-panel-btn:hover {
+      background: rgba(240,78,176,0.2);
+      color: var(--pink);
+      border-color: var(--pink);
+    }
+
+    .cover-mode-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface3);
+      padding: 6px 14px;
+      border-radius: 40px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.72rem;
+      padding: 5px 14px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.15s;
+    }
+    .mode-btn.active {
+      background: var(--lime);
+      color: #09090f;
+    }
+    .mode-btn:hover:not(.active) {
+      background: rgba(200,240,78,0.15);
+      color: var(--lime);
+    }
+
+    .cover-controls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .cover-card {
+      background: var(--surface3);
+      border-radius: 14px;
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      min-width: 100%;
+    }
+    .cover-card h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--lime);
+      margin-bottom: 10px;
+    }
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .slider-group label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      min-width: 35px;
+    }
+    input.cover-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 3px;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none;
+    }
+    input.cover-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--lime);
+      cursor: pointer;
+    }
+    .value-display {
+      background: var(--surface);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      color: var(--lime);
+      min-width: 45px;
+      text-align: center;
+    }
+
+    .action-bar {
+      padding: 20px 24px;
+      background: var(--surface2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .vote-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-vote {
+      background: var(--lime);
+      color: #080810;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 32px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 4px 20px rgba(200,240,78,0.3);
+      width: 100%;
+    }
+    .btn-vote:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(200,240,78,0.4);
+    }
+
+    .vote-description {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .adjust-row {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .btn-covers {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 9px 20px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-covers:hover {
+      color: var(--pink);
+      border-color: rgba(240,78,176,0.3);
+      background: rgba(240,78,176,0.06);
+    }
+    .btn-covers.active {
+      color: var(--pink);
+      border-color: rgba(240,78,176,0.4);
+      background: rgba(240,78,176,0.08);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      transition: 0.32s;
+      opacity: 0;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .inspire-text {
+      color: var(--lime);
+      margin-top: 6px;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 700px) {
+      .iframe-wrap { height: 780px; }
+      .toast { white-space: normal; width: 85%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<nav>
+  <div class="logo">
+    <span class="lili">Lili</span><span class="vote">Vote</span>
+    <div class="dot-accent"></div>
+  </div>
+  <div class="support-badge">this was made to help you</div>
+</nav>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <div class="traffic-lights">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+      <span class="card-label">live poll</span>
+    </div>
+    <div class="header-right">
+      <div class="notif-control">
+        <span class="notif-label">Notifications</span>
+        <div id="notifToggle" class="toggle-switch"><span></span></div>
+      </div>
+      <div id="voteCounter" class="vote-count">0 resets</div>
+      <div class="status-pill"><div class="pulse-dot"></div>Active</div>
+    </div>
+  </div>
+
+  <div class="iframe-wrap">
+    <div id="topCover" class="cover opaque" style="top:0; height:380px"><span class="cover-label">TOP COVER</span></div>
+    <div id="midCover" class="cover opaque" style="top:409px; height:225px"><span class="cover-label">MID COVER</span></div>
+    <div class="loading-overlay" id="loader"><div class="spinner"></div><span class="loading-text">Loading poll…</span></div>
+    <iframe id="pollFrame" src="https://poll.fm/16999108/embed" onload="hideLoader()"></iframe>
+  </div>
+
+  <div class="adjust-panel hidden" id="adjustPanel">
+    <div class="panel-header">
+      <div class="panel-title">COVER CONTROLS</div>
+      <div class="close-panel-btn" id="closePanelBtn">✕</div>
+    </div>
+    <div class="cover-mode-row">
+      <button data-mode="opaque" class="mode-btn active">Opaque (white)</button>
+      <button data-mode="translucent" class="mode-btn">Translucent (lime)</button>
+      <button data-mode="hidden" class="mode-btn">Hidden</button>
+    </div>
+    <div class="cover-controls-grid">
+      <div class="cover-card">
+        <h4>Top Cover</h4>
+        <div class="slider-group">
+          <label>Height</label>
+          <input type="range" id="topHSlider" class="cover-slider" min="0" max="800" value="380" step="1">
+          <span id="topHVal" class="value-display">380px</span>
+        </div>
+      </div>
+      <div class="cover-card">
+        <h4>Middle Cover</h4>
+        <div class="slider-group">
+          <label>Top Y</label>
+          <input type="range" id="midTopSlider" class="cover-slider" min="0" max="800" value="409" step="1">
+          <span id="midTopVal" class="value-display">409px</span>
+        </div>
+        <div class="slider-group" style="margin-top:8px">
+          <label>Height</label>
+          <input type="range" id="midHSlider" class="cover-slider" min="0" max="600" value="225" step="1">
+          <span id="midHVal" class="value-display">225px</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <div class="vote-section">
+      <button class="btn-vote" id="voteAgainBtn">Vote Again</button>
+      <div class="vote-description">Clears cookies & session data, then reloads the poll</div>
+    </div>
+    <div class="adjust-row">
+      <button class="btn-covers" id="adjustBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Adjust Covers
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  <div>LiliVote clears local cookies & session data only · Server-side tracking is unaffected</div>
+  <div class="inspire-text">Lilies, you're doing great. Don't give up!</div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg">Poll reset — vote away!</span></div>
+
+<script>
+  const POLL_URL = "https://poll.fm/16999108/embed";
+  let resetCount = parseInt(localStorage.getItem('lilivote_resets') || '0');
+  let notificationsEnabled = localStorage.getItem('lilivote_notifications') !== 'false';
+  
+  // Strict absolute hard-coded launch configurations (Ignores previous caches entirely)
+  let topHeight = 380;
+  let midTop = 409;
+  let midHeight = 225;
+  let coverMode = 'opaque';
+
+  // Force overwrite immediate localStorage memory on every startup to ensure absolute execution
+  localStorage.setItem('lilivote_topH', '380');
+  localStorage.setItem('lilivote_midTop', '409');
+  localStorage.setItem('lilivote_midH', '225');
+  localStorage.setItem('lilivote_coverMode', 'opaque');
+
+  const iframe = document.getElementById('pollFrame');
+  const topCover = document.getElementById('topCover');
+  const midCover = document.getElementById('midCover');
+  const loader = document.getElementById('loader');
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  const voteCounterSpan = document.getElementById('voteCounter');
+  const notifToggle = document.getElementById('notifToggle');
+  const adjustPanel = document.getElementById('adjustPanel');
+  const adjustBtn = document.getElementById('adjustBtn');
+  const closePanelBtn = document.getElementById('closePanelBtn');
+
+  function hideLoader() { loader.classList.add('hidden'); }
+  function showLoader() { loader.classList.remove('hidden'); }
+
+  function showToast(msg) {
+    if (!notificationsEnabled) return;
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  function updateCoverUI() {
+    topCover.style.height = topHeight + 'px';
+    midCover.style.top = midTop + 'px';
+    midCover.style.height = midHeight + 'px';
+    document.getElementById('topHSlider').value = topHeight;
+    document.getElementById('topHVal').innerText = topHeight + 'px';
+    document.getElementById('midTopSlider').value = midTop;
+    document.getElementById('midTopVal').innerText = midTop + 'px';
+    document.getElementById('midHSlider').value = midHeight;
+    document.getElementById('midHVal').innerText = midHeight + 'px';
+    localStorage.setItem('lilivote_topH', topHeight);
+    localStorage.setItem('lilivote_midTop', midTop);
+    localStorage.setItem('lilivote_midH', midHeight);
+  }
+
+  function applyCoverMode() {
+    topCover.classList.remove('opaque', 'translucent', 'hidden');
+    midCover.classList.remove('opaque', 'translucent', 'hidden');
+    topCover.classList.add(coverMode);
+    midCover.classList.add(coverMode);
+    localStorage.setItem('lilivote_coverMode', coverMode);
+    
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.getAttribute('data-mode') === coverMode) {
+        btn.classList.add('active');
+      }
+    });
+  }
+
+  function setCoverMode(mode) {
+    coverMode = mode;
+    applyCoverMode();
+    showToast(`Cover mode: ${mode === 'opaque' ? 'white solid' : mode === 'translucent' ? 'lime translucent' : 'hidden'}`);
+  }
+
+  function openAdjustPanel() {
+    adjustPanel.classList.remove('hidden');
+    adjustBtn.classList.add('active');
+  }
+
+  function closeAdjustPanel() {
+    adjustPanel.classList.add('hidden');
+    adjustBtn.classList.remove('active');
+  }
+
+  function toggleAdjustPanel() {
+    if (adjustPanel.classList.contains('hidden')) {
+      openAdjustPanel();
+    } else {
+      closeAdjustPanel();
+    }
+  }
+
+  async function resetAndVote() {
+    showLoader();
+    const cookies = document.cookie.split(";");
+    for (let c of cookies) {
+      const name = c.split("=")[0].trim();
+      if (name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        try {
+          const domain = new URL(POLL_URL).hostname;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`;
+        } catch(e) {}
+      }
+    }
+    try { sessionStorage.clear(); } catch(e) {}
+    
+    try {
+      const iframeWin = iframe.contentWindow;
+      if (iframeWin && iframeWin.document) {
+        const iframeCookies = iframeWin.document.cookie.split(";");
+        for (let c of iframeCookies) {
+          const name = c.split("=")[0].trim();
+          if (name) iframeWin.document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        }
+        try { iframeWin.localStorage.clear(); } catch(e) {}
+        try { iframeWin.sessionStorage.clear(); } catch(e) {}
+      }
+    } catch(e) {}
+    
+    resetCount++;
+    localStorage.setItem('lilivote_resets', resetCount);
+    voteCounterSpan.textContent = `${resetCount} reset${resetCount !== 1 ? 's' : ''}`;
+    
+    iframe.src = "about:blank";
+    setTimeout(() => {
+      const freshUrl = POLL_URL + (POLL_URL.includes('?') ? '&' : '?') + '_cb=' + Date.now() + '_r=' + resetCount;
+      iframe.src = freshUrl;
+      showToast(`Poll reset — vote #${resetCount}!`);
+    }, 300);
+  }
+
+  document.getElementById('voteAgainBtn').addEventListener('click', resetAndVote);
+  adjustBtn.addEventListener('click', toggleAdjustPanel);
+  closePanelBtn.addEventListener('click', closeAdjustPanel);
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const mode = btn.getAttribute('data-mode');
+      if (mode === 'opaque') setCoverMode('opaque');
+      else if (mode === 'translucent') setCoverMode('translucent');
+      else if (mode === 'hidden') setCoverMode('hidden');
+    });
+  });
+
+  document.getElementById('topHSlider').addEventListener('input', (e) => {
+    topHeight = parseInt(e.target.value);
+    updateCoverUI();
+  });
+  document.getElementById('midTopSlider').addEventListener('input', (e) => {
+    midTop = parseInt(e.target.value);
+    updateCoverUI();
+  });
+  document.getElementById('midHSlider').addEventListener('input', (e) => {
+    midHeight = parseInt(e.target.value);
+    updateCoverUI();
+  });
+
+  notifToggle.addEventListener('click', () => {
+    notificationsEnabled = !notificationsEnabled;
+    localStorage.setItem('lilivote_notifications', notificationsEnabled);
+    if (notificationsEnabled) {
+      notifToggle.classList.add('active');
+      toastMsg.textContent = 'Notifications enabled';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    } else {
+      notifToggle.classList.remove('active');
+      toastMsg.textContent = 'Notifications disabled';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'V' || e.key === 'v')) {
+      e.preventDefault();
+      resetAndVote();
+    }
+    if (e.key === 'Escape' && !adjustPanel.classList.contains('hidden')) {
+      e.preventDefault();
+      closeAdjustPanel();
+    }
+  });
+
+  iframe.onload = () => { hideLoader(); updateCoverUI(); applyCoverMode(); };
+  
+  voteCounterSpan.textContent = `${resetCount} reset${resetCount !== 1 ? 's' : ''}`;
+  updateCoverUI();
+  applyCoverMode();
+  if (notificationsEnabled) notifToggle.classList.add('active');
+  else notifToggle.classList.remove('active');
+</script>
+</body>
+</html>
